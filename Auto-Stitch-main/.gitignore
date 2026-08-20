@@ -1,0 +1,19 @@
+# Local workspace files
+scratch/
+
+# Generated documentation artifacts
+AutoStitch_SRS.docx
+extracted_srs.txt
+
+# Operating system files
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+
+# Runtime uploads
+backend/uploads/*
