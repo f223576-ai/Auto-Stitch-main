@@ -1,0 +1,892 @@
+.editorial-product-page {
+  background-color: #ffffff;
+  min-height: 100vh;
+  padding-top: 130px;
+  padding-bottom: 100px;
+}
+
+.product-editorial-container {
+  padding: 40px 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 80px;
+  align-items: flex-start;
+}
+
+/* Left: Image */
+.product-image-section {
+  position: sticky;
+  top: 170px;
+}
+
+.main-editorial-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  background-color: #f9f9f9;
+}
+
+/* Right: Info */
+.product-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.pi-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 20px;
+}
+
+.pi-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.pi-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #111;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.pi-price {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  color: #111;
+  margin: 0;
+}
+
+.pi-category {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.pi-description {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #444;
+}
+
+.pi-sku {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-top: 15px;
+  letter-spacing: 0.05em;
+}
+
+.pi-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.add-to-cart-btn, .ai-editorial-btn {
+  width: 100%;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.add-to-cart-btn:hover, .ai-editorial-btn:hover {
+  opacity: 0.8;
+}
+
+.find-in-store {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem;
+  color: #666;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Accordions */
+.pi-accordions {
+  border-top: 1px solid #f0f0f0;
+  margin-top: 20px;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.accordion-trigger {
+  width: 100%;
+  padding: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #111;
+  cursor: pointer;
+}
+
+.accordion-trigger span {
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: #aaa;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.accordion-item.open .accordion-content {
+  max-height: 200px;
+  padding-bottom: 20px;
+  opacity: 1;
+}
+
+.accordion-content p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #666;
+}
+
+.loading-state {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  color: #888;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 992px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .product-image-section {
+    position: relative;
+    top: 0;
+  }
+  .product-editorial-container {
+    padding: 30px;
+  }
+}
+
+/* Curated Selections Slider */
+.curated-selections-section {
+  padding: 80px 0 80px 60px;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.curated-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 60px;
+  margin-bottom: 40px;
+}
+
+.slider-controls {
+  display: flex;
+  gap: 15px;
+}
+
+.slider-arrow {
+  background: none;
+  border: 1px solid #eee;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #111;
+  transition: all 0.3s;
+}
+
+.slider-arrow:hover {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.curated-slider-outer {
+  position: relative;
+  width: 100%;
+}
+
+.curated-slider-track {
+  display: flex;
+  gap: 40px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0 60px 40px 60px; /* Added horizontal padding */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.curated-slider-track::-webkit-scrollbar {
+  display: none;
+}
+
+.slider-card {
+  width: 380px; /* Fixed width for consistency */
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ep-image-wrap {
+  width: 100%;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background-color: #f8f8f8;
+}
+
+.serif-subtitle {
+  font-family: 'Mrs Saint Delafield', cursive;
+  font-size: 3rem;
+  font-weight: 400;
+  color: #111;
+  margin: 0;
+}
+
+.editorial-product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ep-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.editorial-product-card:hover .ep-image {
+  transform: scale(1.05);
+}
+
+.ep-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.ep-info-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.ep-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #111;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ep-price {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem;
+  color: #666;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .curated-selections-section {
+    padding-left: 30px;
+  }
+  .curated-header-row {
+    padding-right: 30px;
+  }
+  .slider-card {
+    min-width: 260px;
+  }
+}
+
+/* Main Image Slider */
+.main-editorial-image-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.pd-image-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(10, 10, 20, 0.4);
+  color: #fff;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s, background 0.3s;
+  z-index: 10;
+}
+.main-editorial-image-wrapper:hover .pd-image-nav {
+  opacity: 1;
+}
+.pd-image-nav:hover {
+  background: rgba(10, 10, 20, 0.8);
+}
+.pd-image-nav.left {
+  left: 20px;
+}
+.pd-image-nav.right {
+  right: 20px;
+}
+
+.pd-image-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.pd-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transition: background 0.3s, transform 0.3s;
+}
+.pd-dot.active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+/* ===== PRODUCT DETAIL RESPONSIVE ===== */
+@media (max-width: 992px) {
+  .pd-editorial-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .pd-image-col {
+    position: static;
+  }
+
+  .pd-editorial-wrap {
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pd-editorial-wrap {
+    padding: 20px 16px;
+  }
+
+  .pd-product-name {
+    font-size: 1.4rem;
+  }
+
+  .pd-price-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .pd-action-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pd-add-cart,
+  .pd-wishlist-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pd-curated-title {
+    font-size: 1.4rem;
+  }
+
+  .curated-card {
+    flex: 0 0 200px;
+  }
+
+  .pd-image-nav {
+    width: 32px;
+    height: 32px;
+  }
+
+  .pd-image-nav.left { left: 12px; }
+  .pd-image-nav.right { right: 12px; }
+}
+
+@media (max-width: 480px) {
+  .pd-editorial-wrap {
+    padding: 16px 12px;
+  }
+
+  .pd-product-name {
+    font-size: 1.2rem;
+  }
+
+  .pd-breadcrumb-editorial {
+    font-size: 0.7rem;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pd-size-options {
+    gap: 8px;
+  }
+
+  .pd-size-btn {
+    min-width: 44px;
+    padding: 10px 14px;
+  }
+
+  .curated-card {
+    flex: 0 0 170px;
+  }
+
+  .pd-curated-section {
+    padding: 40px 12px;
+  }
+}
+
+/* =========================================================================
+   VIRTUAL TRY-ON STUDIO MODAL (EXACT ADMIN DASHBOARD ATELIER DESIGN)
+   ========================================================================= */
+.vto-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease-out;
+  font-family: 'Poppins', sans-serif;
+}
+
+.vto-modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 540px;
+  border-radius: 4px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  border: 1px solid #000000;
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleUp {
+  0% { opacity: 0; transform: scale(0.96) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.vto-modal-header {
+  padding: 16px 24px;
+  background: #000000;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #000000;
+}
+
+.vto-header-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #ffffff;
+  letter-spacing: 0.08em;
+  font-family: 'Tenor Sans', 'Playfair Display', serif;
+  text-transform: uppercase;
+}
+
+.vto-close-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.vto-close-btn:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.vto-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.vto-product-badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 2px;
+  border: 1px solid #e5e5e5;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+}
+
+.vto-product-badge:hover {
+  border-color: #000000;
+}
+
+.vto-badge-thumb {
+  width: 48px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 2px;
+  border: 1px solid #e5e5e5;
+}
+
+.vto-badge-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #000000;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vto-badge-meta {
+  font-size: 0.78rem;
+  color: #666666;
+  margin: 3px 0 0;
+  font-weight: 400;
+}
+
+.vto-fullscreen-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #000000;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  padding: 6px 12px;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: all 0.2s;
+}
+
+.vto-fullscreen-link:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+.vto-drop-area {
+  border: 1px dashed #000000;
+  border-radius: 2px;
+  padding: 34px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: #fafafa;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.vto-drop-area:hover {
+  background: #f5f5f5;
+  border-color: #000000;
+}
+
+.vto-drop-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  color: #000000;
+}
+
+.vto-drop-heading {
+  font-family: 'Tenor Sans', 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: #000000;
+  margin: 0 0 4px;
+  letter-spacing: 0.02em;
+}
+
+.vto-drop-subtext {
+  font-size: 0.78rem;
+  color: #666666;
+  max-width: 320px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.vto-privacy-card {
+  display: flex;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-left: 3px solid #000000;
+  padding: 12px 14px;
+  border-radius: 2px;
+  margin-top: 18px;
+}
+
+.vto-privacy-card strong {
+  color: #000000;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vto-primary-btn {
+  width: 100%;
+  padding: 14px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.vto-primary-btn:hover:not(:disabled) {
+  background: #222222;
+  color: #ffffff;
+}
+
+.vto-primary-btn:disabled {
+  background: #f0f0f0;
+  color: #999999;
+  border: 1px solid #e0e0e0;
+  cursor: not-allowed;
+}
+
+.vto-processing-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.vto-spinner {
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.vto-change-photo-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 6px 12px;
+  border-radius: 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vto-change-photo-btn:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+.vto-result-image-box {
+  position: relative;
+  width: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.vto-badge-floating {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 5px 10px;
+  border-radius: 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-family: 'Poppins', sans-serif;
+}
+
+.vto-result-controls {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vto-compare-btn {
+  width: 100%;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #000000;
+  color: #000000;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 2px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.vto-compare-btn:hover {
+  background: #f5f5f5;
+}
+
+.vto-download-btn {
+  flex: 1;
+  padding: 12px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.vto-download-btn:hover {
+  background: #222222;
+}
+
+.vto-delete-btn {
+  flex: 1;
+  padding: 12px;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.vto-delete-btn:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+
+
