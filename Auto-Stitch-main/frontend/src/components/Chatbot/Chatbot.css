@@ -2,7 +2,7 @@
 
 .chatbot-toggle {
   position: fixed;
-  bottom: 30px;
+  bottom: 28px;
   right: 30px;
   width: 64px;
   height: 64px;
@@ -40,12 +40,27 @@
   letter-spacing: 0.05em;
 }
 
+/*
+  Chat window sizing
+  ------------------
+  The toggle button is removed from the page while the window is open, so the
+  window can sit in the same corner slot (bottom: 28px / right: 30px).
+
+  The height is clamped to the viewport: min(580px, 100% of the viewport minus
+  28px top + 28px bottom breathing room). On a short browser window the chat
+  shrinks instead of being pushed off the top of the screen.
+
+  The `vh` line is a fallback for browsers that don't support `dvh`; browsers
+  that do support it use the second line.
+*/
 .chatbot-window {
   position: fixed;
-  bottom: 110px;
+  bottom: 28px;
   right: 30px;
   width: 380px;
-  height: 580px;
+  max-width: calc(100vw - 20px);
+  height: min(580px, calc(100vh - 56px));
+  height: min(580px, calc(100dvh - 56px));
   background: var(--color-bg-glass);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
@@ -64,9 +79,10 @@
 }
 
 .chatbot-header {
+  flex-shrink: 0;
   background: #fff;
   color: var(--color-text-primary);
-  padding: 16px 24px;
+  padding: 18px 24px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -79,16 +95,9 @@
   gap: 14px;
 }
 
+/* Gold sparkle avatar removed from the header */
 .bot-avatar {
-  width: 36px;
-  height: 36px;
-  background: var(--gradient-accent);
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  box-shadow: var(--shadow-glow);
+  display: none;
 }
 
 .header-info h3 {
@@ -133,6 +142,7 @@
 
 .chatbot-messages {
   flex: 1;
+  min-height: 0; /* lets this area shrink and scroll inside the flex column */
   padding: 24px;
   overflow-y: auto;
   display: flex;
@@ -185,6 +195,7 @@
 }
 
 .chatbot-input {
+  flex-shrink: 0;
   padding: 20px 24px;
   background: #fff;
   display: flex;
@@ -272,7 +283,7 @@
 
 @media (max-width: 768px) {
   .chatbot-toggle {
-    bottom: 20px;
+    bottom: 24px;
     right: 20px;
     width: 56px;
     height: 56px;
@@ -280,9 +291,10 @@
 
   .chatbot-window {
     right: 15px;
+    bottom: 24px;
     width: 340px;
-    height: 520px;
-    bottom: 90px;
+    height: min(520px, calc(100vh - 48px));
+    height: min(520px, calc(100dvh - 48px));
   }
 
   .chatbot-messages {
@@ -298,14 +310,16 @@
   .chatbot-window {
     right: 10px;
     left: 10px;
+    bottom: 16px;
     width: auto;
-    height: 70vh;
-    bottom: 85px;
+    max-width: none;
+    height: min(640px, calc(100vh - 32px));
+    height: min(640px, calc(100dvh - 32px));
     border-radius: var(--radius-lg);
   }
 
   .chatbot-toggle {
-    bottom: 15px;
+    bottom: 18px;
     right: 15px;
     width: 52px;
     height: 52px;

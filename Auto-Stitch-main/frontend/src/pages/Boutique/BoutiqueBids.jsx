@@ -182,6 +182,41 @@ export default function BoutiqueBids() {
                   </div>
                 </div>
 
+                {/* Reference photos the customer attached for each region */}
+                {selectedRequest.regionReferences?.length > 0 && (
+                  <div style={{ marginBottom: '4rem' }}>
+                    <h4 style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Reference Photos by Region</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {selectedRequest.selectedRegions?.map(region => {
+                        const photos = selectedRequest.regionReferences.filter(ref => ref.region === region);
+                        if (photos.length === 0) return null;
+                        return (
+                          <div key={region}>
+                            <span style={{ display: 'inline-block', fontSize: '0.65rem', fontWeight: '700', padding: '4px 12px', background: '#f5f5f5', borderRadius: '20px', textTransform: 'uppercase', marginBottom: '10px' }}>{region}</span>
+                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                              {photos.map((photo, i) => (
+                                <a key={i} href={photo.image} target="_blank" rel="noreferrer" title="Open full size" style={{ display: 'block', position: 'relative' }}>
+                                  <img
+                                    src={photo.image}
+                                    alt={`${region} reference ${i + 1}`}
+                                    style={{ width: '120px', height: '160px', objectFit: 'cover', border: '1px solid #eee', display: 'block' }}
+                                    onError={(e) => { e.target.style.visibility = 'hidden'; }}
+                                  />
+                                  {photo.source === 'catalogue' && photo.productName && (
+                                    <span style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '14px 6px 4px', fontSize: '0.6rem', color: '#fff', background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      {photo.productName}
+                                    </span>
+                                  )}
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div className="bid-submission-area" style={{ borderTop: '1px solid #f5f5f5', paddingTop: '3rem' }}>
                   <h3 style={{ fontFamily: '"Tenor Sans", serif', fontSize: '1.8rem', marginBottom: '2rem' }}>Submit Proposal</h3>
                   <form onSubmit={handleSubmitBid} className="modal-form" style={{ background: '#f9f9f9', padding: '2.5rem' }}>
@@ -246,4 +281,3 @@ export default function BoutiqueBids() {
     </div>
   );
 }
-
