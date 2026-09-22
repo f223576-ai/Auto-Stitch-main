@@ -182,6 +182,26 @@ export default function BoutiqueBids() {
                   </div>
                 </div>
 
+                {/* AI preview of the customer's design (a guide, not a final render) */}
+                {selectedRequest.previewImage && (
+                  <div style={{ marginBottom: '4rem' }}>
+                    <h4 style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Customer's Design Preview</h4>
+                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                      <a href={selectedRequest.previewImage} target="_blank" rel="noreferrer" title="Open full size" style={{ display: 'block' }}>
+                        <img
+                          src={selectedRequest.previewImage}
+                          alt="Customer's design preview"
+                          style={{ width: '250px', border: '1px solid #eee', display: 'block' }}
+                          onError={(e) => { e.target.style.visibility = 'hidden'; }}
+                        />
+                      </a>
+                      <p style={{ maxWidth: '360px', fontSize: '0.85rem', lineHeight: '1.7', color: '#666' }}>
+                        AI-generated from the customer's description and reference photos. Use it as a guide for the finished look.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Reference photos the customer attached for each region */}
                 {selectedRequest.regionReferences?.length > 0 && (
                   <div style={{ marginBottom: '4rem' }}>

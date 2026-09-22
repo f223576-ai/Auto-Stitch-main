@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import API_URL from '../../config/api';
 import RegionReference from './RegionReference';
+import DesignPreview from './DesignPreview';
 import './Customize.css';
 import './RegionReference.css';
 
@@ -22,6 +23,8 @@ const MAX_PER_REGION = 3;
 const MAX_FILE_MB = 5; // matches the backend upload limit
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const UPLOAD_BATCH = 5; // backend accepts at most 5 files per upload request
+const MAX_REGENERATIONS = 2; // extra design versions per visit to the last step (each one costs an AI call)
+const IDLE_PREVIEW = { status: 'idle', id: '', path: '', category: 'dresses', error: '' };
 
 const newId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -40,8 +43,12 @@ export default function Customize() {
   // { [regionId]: [{ id, source: 'gallery' | 'catalogue', preview, file?, url?, productId?, productName? }] }
   const [regionRefs, setRegionRefs] = useState({});
   const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState(IDLE_PREVIEW);
+  const [regenCount, setRegenCount] = useState(0);
 
   const blobUrlsRef = useRef(new Set());
+  const uploadedUrlsRef = useRef(new Map()); // gallery photo id -> uploaded URL (so each photo is uploaded once)
+  const previewTokenRef = useRef(0); // lets us ignore a preview that finished after the customer went back
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -129,6 +136,83 @@ export default function Customize() {
     setRegionRefs((prev) => ({ ...prev, [regionId]: (prev[regionId] || []).filter((r) => r.id !== refId) }));
   };
 
+  // Uploads any gallery photos that are not on the server yet and returns the
+  // per-region list in the shape the API expects. Catalogue photos are already hosted.
+  const buildRegionReferences = async () => {
+    const pending = allRefs.filter((r) => r.source === 'gallery' && !uploadedUrlsRef.current.has(r.id));
+
+    for (let i = 0; i < pending.length; i += UPLOAD_BATCH) {
+      const batch = pending.slice(i, i + UPLOAD_BATCH);
+      const formData = new FormData();
+      batch.forEach((r) => formData.append('images', r.file));
+
+      const uploadRes = await axios.post(`${API_URL}/api/upload/multi`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true
+      });
+      const urls = uploadRes.data.urls || [];
+      if (urls.length !== batch.length) {
+        throw new Error('Some photos could not be uploaded. Please try again.');
+      }
+      batch.forEach((r, idx) => uploadedUrlsRef.current.set(r.id, urls[idx]));
+    }
+
+    return allRefs.map((r) => ({
+      region: r.region,
+      image: r.source === 'gallery' ? uploadedUrlsRef.current.get(r.id) : r.url,
+      source: r.source,
+      ...(r.productId ? { productId: String(r.productId) } : {}),
+      ...(r.productName ? { productName: r.productName } : {}),
+    }));
+  };
+
+  const generatePreview = async () => {
+    const token = ++previewTokenRef.current;
+    setPreview({ ...IDLE_PREVIEW, status: 'loading' });
+
+    try {
+      const regionReferences = await buildRegionReferences();
+      const { data } = await axios.post(`${API_URL}/api/custom-preview`, {
+        productId,
+        selectedRegions,
+        description,
+        regionReferences
+      }, { withCredentials: true });
+
+      if (token !== previewTokenRef.current) return; // the customer went back, this result is stale
+      setPreview({ status: 'ready', id: data.previewId, path: data.previewPath, category: data.category || 'dresses', error: '' });
+    } catch (error) {
+      if (token !== previewTokenRef.current) return;
+      if (error.response?.data?.code === 'PREVIEW_NOT_CONFIGURED') {
+        setPreview({ ...IDLE_PREVIEW, status: 'unavailable' });
+      } else {
+        setPreview({
+          ...IDLE_PREVIEW,
+          status: 'error',
+          error: error.response?.data?.message || error.message || 'Please check your connection and try again.'
+        });
+      }
+    }
+  };
+
+  const goToConfirm = () => {
+    setRegenCount(0);
+    setStep(3);
+    generatePreview();
+  };
+
+  // Only a finished design counts as a used version; retrying after an error is free
+  const regenerate = () => {
+    if (preview.status === 'ready') setRegenCount((n) => n + 1);
+    generatePreview();
+  };
+
+  const backFromConfirm = () => {
+    previewTokenRef.current++; // discard a preview that is still being made
+    setPreview(IDLE_PREVIEW);
+    setStep(2);
+  };
+
   const handleSubmit = async () => {
     if (!budget || isNaN(Number(budget)) || Number(budget) <= 0) {
       toast.error('Please enter a valid budget.');
@@ -137,34 +221,7 @@ export default function Customize() {
 
     setLoading(true);
     try {
-      // 1. Upload only the gallery photos (catalogue photos already live on the server)
-      const galleryRefs = allRefs.filter((r) => r.source === 'gallery');
-      const uploadedUrlById = new Map();
-
-      for (let i = 0; i < galleryRefs.length; i += UPLOAD_BATCH) {
-        const batch = galleryRefs.slice(i, i + UPLOAD_BATCH);
-        const formData = new FormData();
-        batch.forEach((r) => formData.append('images', r.file));
-
-        const uploadRes = await axios.post(`${API_URL}/api/upload/multi`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          withCredentials: true
-        });
-        const urls = uploadRes.data.urls || [];
-        if (urls.length !== batch.length) {
-          throw new Error('Some photos could not be uploaded. Please try again.');
-        }
-        batch.forEach((r, idx) => uploadedUrlById.set(r.id, urls[idx]));
-      }
-
-      // 2. Save the request, keeping track of which photo belongs to which region
-      const regionReferences = allRefs.map((r) => ({
-        region: r.region,
-        image: r.source === 'gallery' ? uploadedUrlById.get(r.id) : r.url,
-        source: r.source,
-        ...(r.productId ? { productId: String(r.productId) } : {}),
-        ...(r.productName ? { productName: r.productName } : {}),
-      }));
+      const regionReferences = await buildRegionReferences();
       const referenceImages = [...new Set(regionReferences.map((r) => r.image))];
 
       const response = await axios.post(`${API_URL}/api/bids/request`, {
@@ -173,7 +230,8 @@ export default function Customize() {
         description,
         budget: Number(budget),
         referenceImages,
-        regionReferences
+        regionReferences,
+        ...(preview.status === 'ready' ? { previewImage: `${API_URL}${preview.path}` } : {})
       }, { withCredentials: true });
 
       if (response.data.success) {
@@ -331,7 +389,7 @@ export default function Customize() {
                     className="btn-black"
                     style={{ flex: 2 }}
                     disabled={!description.trim() || allRefs.length === 0 || !budget}
-                    onClick={() => setStep(3)}
+                    onClick={goToConfirm}
                   >
                     PREVIEW REQUEST
                   </button>
@@ -342,6 +400,14 @@ export default function Customize() {
             {/* STEP 3: REVIEW */}
             {step === 3 && (
               <div className="step-content-v2">
+                <DesignPreview
+                  preview={preview}
+                  regenLeft={Math.max(0, MAX_REGENERATIONS - regenCount)}
+                  onRegenerate={regenerate}
+                  onSend={handleSubmit}
+                  sending={loading}
+                />
+
                 <div className="review-v2-card">
                   <div className="review-v2-header">
                     <div className="success-badge">
@@ -392,16 +458,13 @@ export default function Customize() {
                 </div>
 
                 <div className="upload-action" style={{ marginTop: '3rem', flexDirection: 'row', gap: '1rem' }}>
-                  <button className="btn btn-outline" style={{ flex: 1, height: '60px', borderRadius: '0' }} onClick={() => setStep(2)}>
-                    BACK
-                  </button>
                   <button
-                    className="btn-black"
-                    style={{ flex: 2 }}
+                    className="btn btn-outline"
+                    style={{ flex: '0 0 auto', minWidth: '220px', height: '60px', borderRadius: '0' }}
                     disabled={loading}
-                    onClick={handleSubmit}
+                    onClick={backFromConfirm}
                   >
-                    {loading ? 'BROADCASTING...' : 'BROADCAST TO BOUTIQUES'}
+                    BACK
                   </button>
                 </div>
               </div>
