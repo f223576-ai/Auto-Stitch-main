@@ -106,3 +106,24 @@
   font-size: 1rem;
   line-height: 1.6;
 }
+
+.password-changed-panel {
+  margin-top: 8px;
+  padding: 20px 18px;
+  border-radius: 12px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.password-changed-panel-title {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.password-changed-panel-copy {
+  margin: 0 0 20px;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}

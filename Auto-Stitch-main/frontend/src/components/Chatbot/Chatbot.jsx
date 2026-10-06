@@ -3,6 +3,7 @@ import axios from 'axios';
 import { MessageSquare, X, Send, Minus, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import API_URL from '../../config/api';
+import ChatMessage from './ChatMessage';
 import './Chatbot.css';
 
 export default function Chatbot() {
@@ -92,7 +93,7 @@ export default function Chatbot() {
             {messages.map((msg, i) => (
               <div key={i} className={`chat-bubble ${msg.role}`}>
                 <div className="bubble-content">
-                  {msg.content}
+                  {msg.role === 'assistant' ? <ChatMessage content={msg.content} /> : msg.content}
                 </div>
               </div>
             ))}

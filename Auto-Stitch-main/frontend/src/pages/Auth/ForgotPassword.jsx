@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import API_URL from '../../config/api';
+import { passwordError } from '../../utils/passwordPolicy';
+import PasswordRules from '../../components/PasswordRules';
 import './MinimalAuth.css';
 
 export default function ForgotPassword() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
   
@@ -17,6 +18,7 @@ export default function ForgotPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -61,13 +63,19 @@ export default function ForgotPassword() {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) return toast.error('Passwords do not match');
-    if (password.length < 6) return toast.error('Password must be at least 6 characters');
+    const passwordIssue = passwordError(password);
+    if (passwordIssue) return toast.error(passwordIssue);
 
     setIsSubmitting(true);
     try {
-      await axios.put(`${API_URL}/api/auth/resetpassword`, { email, role, otp, password });
-      toast.success('Password updated successfully!');
-      navigate(role === 'admin' ? '/admin-login' : role === 'boutique_owner' ? '/boutique-login' : '/login');
+      const res = await axios.put(`${API_URL}/api/auth/resetpassword`, { email, role, otp, password });
+      const sent = Boolean(res.data?.emailSent);
+      const message = sent
+        ? `A confirmation email was sent to ${email}.`
+        : `Your password is updated. A confirmation email to ${email} could not be sent.`;
+      setSuccessMessage(message);
+      toast.success('Password changed', { duration: 6000 });
+      setStep(4);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to reset password');
     } finally {
@@ -79,11 +87,12 @@ export default function ForgotPassword() {
     <div className="minimal-auth-page page-enter">
       <div className="minimal-auth-container">
         <h1 className="minimal-auth-title">
-          {step === 1 ? 'Forgot Password' : step === 2 ? 'Verify OTP' : 'New Password'}
+          {step === 1 ? 'Forgot Password' : step === 2 ? 'Verify OTP' : step === 4 ? 'Password Changed' : 'New Password'}
         </h1>
         <p className="minimal-auth-subtitle">
           {step === 1 ? 'Enter your email to receive a reset code.' : 
            step === 2 ? `Enter the 6-digit code sent to ${email}` : 
+           step === 4 ? 'Your account password has been updated.' :
            'Choose a new secure password for your account.'}
         </p>
 
@@ -149,6 +158,7 @@ export default function ForgotPassword() {
             <div className="minimal-form-group">
               <label>New Password*</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoFocus />
+              <PasswordRules password={password} />
             </div>
             <div className="minimal-form-group">
               <label>Confirm New Password*</label>
@@ -158,6 +168,20 @@ export default function ForgotPassword() {
               {isSubmitting ? 'Updating...' : 'Reset Password'}
             </button>
           </form>
+        )}
+
+        {step === 4 && (
+          <div className="password-changed-panel" role="status">
+            <p className="password-changed-panel-title">Password changed</p>
+            <p className="password-changed-panel-copy">{successMessage}</p>
+            <Link
+              to={role === 'admin' ? '/admin-login' : role === 'boutique_owner' ? '/boutique-login' : '/login'}
+              className="minimal-submit-btn"
+              style={{ display: 'block', textDecoration: 'none' }}
+            >
+              Back to Login
+            </Link>
+          </div>
         )}
       </div>
     </div>

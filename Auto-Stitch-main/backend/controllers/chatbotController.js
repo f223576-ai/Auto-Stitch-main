@@ -94,7 +94,10 @@ Instructions:
 - Use the context provided above to give specific recommendations if available.
 - If a user asks about "Virtual Try-On", tell them it's a feature where they can upload their photo to see how clothes look on them.
 - If they ask about "Customization", explain they can request modifications and boutiques will bid on their requests.
-- Keep answers concise (max 3-4 sentences).
+- Keep answers concise.
+- Write a plain answer as one or two short paragraphs.
+- When you recommend products or give steps, put each one on its own line starting with "- " or "1. ".
+- Bold product and boutique names. Write prices as PKR 21,000.
 - If you don't know something, suggest they contact our support or visit the Contact page.`;
 
     const candidateModels = ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'];

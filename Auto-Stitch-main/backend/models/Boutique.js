@@ -20,6 +20,20 @@ const boutiqueSchema = new mongoose.Schema(
       email: String,
       website: String,
     },
+    visitingCard: {
+      visible: { type: Boolean, default: false },
+      image: { type: String, default: '' },
+      address: {
+        street: { type: String, default: '' },
+        city: { type: String, default: '' },
+        province: { type: String, default: '' },
+        postalCode: { type: String, default: '' },
+      },
+      contact: {
+        phone: { type: String, default: '' },
+        email: { type: String, default: '' },
+      },
+    },
     kyc: {
       status: { type: String, enum: ['pending', 'verified', 'rejected'], default: 'pending' },
       cnic: { type: String },

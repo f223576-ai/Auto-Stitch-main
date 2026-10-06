@@ -127,9 +127,66 @@ const submitBoutiqueKyc = async (req, res) => {
   }
 };
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// @desc    Save the boutique visiting card
+// @route   PUT /api/boutiques/visiting-card
+// @access  Private (Boutique Owner)
+const updateVisitingCard = async (req, res) => {
+  try {
+    const { image, address = {}, contact = {} } = req.body;
+    const street = String(address.street || '').trim();
+    const city = String(address.city || '').trim();
+    const province = String(address.province || '').trim();
+    const postalCode = String(address.postalCode || '').trim();
+    const phone = String(contact.phone || '').trim();
+    const email = String(contact.email || '').trim();
+    const photo = String(image || '').trim();
+
+    if (!photo) {
+      return res.status(400).json({ success: false, message: 'A visiting card photo is required' });
+    }
+    if (!street || !city) {
+      return res.status(400).json({ success: false, message: 'Street and city are required' });
+    }
+    if (!phone) {
+      return res.status(400).json({ success: false, message: 'A contact phone number is required' });
+    }
+    if (email && !EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid contact email' });
+    }
+
+    let boutique = await Boutique.findOne({ owner: req.user._id });
+    if (!boutique) {
+      boutique = new Boutique({
+        owner: req.user._id,
+        name: `${req.user.name}'s Atelier`,
+      });
+    }
+
+    boutique.visitingCard = {
+      visible: req.body.visible === true,
+      image: photo,
+      address: { street, city, province, postalCode },
+      contact: { phone, email },
+    };
+    await boutique.save();
+
+    res.json({
+      success: true,
+      message: 'Visiting card saved',
+      visitingCard: boutique.visitingCard,
+    });
+  } catch (error) {
+    console.error('Update visiting card error:', error);
+    res.status(500).json({ success: false, message: 'Server error saving visiting card' });
+  }
+};
+
 module.exports = {
   getBoutiqueById,
   getAllBoutiques,
   getMyBoutique,
-  submitBoutiqueKyc
+  submitBoutiqueKyc,
+  updateVisitingCard,
 };

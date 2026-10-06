@@ -115,7 +115,7 @@ export default function App() {
       (response) => response,
       (error) => {
         const url = error.config?.url || '';
-        const isAuthEndpoint = url.includes('/api/auth/login') || url.includes('/api/auth/register') || url.includes('/api/chatbot');
+        const isAuthEndpoint = url.includes('/api/auth/login') || url.includes('/api/auth/register') || url.includes('/api/chatbot') || url.includes('/api/auth/updatepassword') || url.includes('/api/auth/2fa/disable');
         if (error.response?.status === 401 && !isAuthEndpoint && localStorage.getItem('token')) {
           handleLogout();
         }
@@ -129,7 +129,7 @@ export default function App() {
       <WishlistProvider>
         <CartProvider>
           <Router>
-            <Toaster position="top-right" />
+            <Toaster position="top-right" containerStyle={{ top: 96, zIndex: 10050 }} />
             <ScrollToTop />
             <Navbar user={user} onLogout={handleLogout} />
             <CartDrawer />

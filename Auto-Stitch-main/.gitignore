@@ -50,6 +50,27 @@ Thumbs.db
 # Temporary / Scratch files
 scratch/
 extracted_srs.txt
-backend/uploads/vto_temp/
+srs_content.txt
+MASTER PROMPT*
+
+# Runtime uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
 uploads/vto_temp/
+
+# Virtual try-on checkpoints
+IDM-VTON/ckpt/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Test and typecheck output
+coverage/
+.nyc_output/
+*.tsbuildinfo
 

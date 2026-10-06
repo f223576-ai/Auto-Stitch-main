@@ -47,6 +47,7 @@ export default function AdminLogin({ onLogin }) {
       }
 
       localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('token', data.accessToken);
       onLogin && onLogin(data.user);
       navigate('/admin');
     } catch (err) {

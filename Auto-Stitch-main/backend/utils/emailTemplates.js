@@ -193,4 +193,44 @@ const getBoutiqueStatusTemplate = (name, status, reason = '') => {
   `;
 };
 
-module.exports = { getOrderConfirmationTemplate, getOrderStatusTemplate, getContactReplyTemplate, getWelcomeTemplate, getBoutiqueStatusTemplate };
+const getPasswordChangedTemplate = (name) => {
+  const changedAt = new Date().toLocaleString('en-PK', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Asia/Karachi',
+  });
+  const safeName = String(name || 'there')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  return `
+    <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e1e4e8; border-radius: 12px; overflow: hidden;">
+      <div style="background: #1a1a2e; padding: 30px; text-align: center; color: white;">
+        <h1 style="margin: 0; font-size: 24px; letter-spacing: 2px;">AUTO STITCH</h1>
+        <p style="margin-top: 10px; opacity: 0.8;">Password Changed</p>
+      </div>
+      <div style="padding: 30px;">
+        <h2 style="color: #1a1a2e;">Hello ${safeName},</h2>
+        <p style="color: #4a4a6a; line-height: 1.6; font-size: 16px;">
+          Your Auto Stitch password was changed on <strong>${changedAt}</strong> (PKT).
+        </p>
+        <div style="background: #f0fdf4; padding: 18px 20px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #16a34a;">
+          <p style="margin: 0; font-weight: 600; color: #166534;">Your password has been changed successfully.</p>
+        </div>
+        <p style="color: #4a4a6a; line-height: 1.6; font-size: 15px;">
+          If you made this change, no further action is needed. If you did not change your password, reset it immediately and contact support.
+        </p>
+        <div style="margin-top: 32px; text-align: center;">
+          <a href="${process.env.CLIENT_URL || ''}/forgot-password" style="background: #1a1a2e; color: white; padding: 12px 25px; text-decoration: none; border-radius: 30px; font-weight: 600; display: inline-block;">Reset Password</a>
+        </div>
+        <div style="margin-top: 40px; padding: 20px; border-top: 1px solid #eee; font-size: 12px; color: #8a8a9a; text-align: center;">
+          <p>This is a security notice. Auto Stitch will never ask you to share your password.</p>
+          <p>&copy; ${new Date().getFullYear()} Auto Stitch Premium Boutique Marketplace</p>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+module.exports = { getOrderConfirmationTemplate, getOrderStatusTemplate, getContactReplyTemplate, getWelcomeTemplate, getBoutiqueStatusTemplate, getPasswordChangedTemplate };

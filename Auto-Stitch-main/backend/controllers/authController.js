@@ -6,19 +6,35 @@ const { User, Admin, BoutiqueOwner, Customer, getUserModel } = require('../model
 const Boutique = require('../models/Boutique');
 const { z } = require('zod');
 const sendEmail = require('../utils/sendEmail');
-const { getWelcomeTemplate } = require('../utils/emailTemplates');
+const Notification = require('../models/Notification');
+const { getWelcomeTemplate, getPasswordChangedTemplate } = require('../utils/emailTemplates');
 // ===== Zod Validation Schemas =====
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|co|info|io|pk|uk|us|ca|au)$/i;
+
+const securePassword = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/[a-z]/, 'Password must contain a lowercase letter')
+  .regex(/[A-Z]/, 'Password must contain a capital letter')
+  .regex(/\d/, 'Password must contain a number')
+  .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain a special character');
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50).trim(),
   email: z.string().email('Invalid email address').regex(EMAIL_REGEX, 'Please enter a valid email domain (e.g., .com, .net)').trim().toLowerCase(),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
+  password: securePassword,
   role: z.enum(['customer', 'boutique_owner']).optional().default('customer'),
+});
+
+const updatePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: securePassword,
+});
+
+const resetPasswordSchema = z.object({
+  email: z.string().email('Invalid email address').trim().toLowerCase(),
+  role: z.enum(['customer', 'boutique_owner', 'admin']).optional().default('customer'),
+  otp: z.string().min(1, 'OTP is required'),
+  password: securePassword,
 });
 
 const loginSchema = z.object({
@@ -47,7 +63,48 @@ const generateTokens = (id, role) => {
 };
 
 // Set token cookies
-const sendTokenResponse = (user, statusCode, res) => {
+const sendPasswordChangedEmail = async (user) => {
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Your password was changed — Auto Stitch',
+      html: getPasswordChangedTemplate(user.name),
+    });
+    return true;
+  } catch (err) {
+    console.error('Password changed email error:', err);
+    return false;
+  }
+};
+
+const passwordChangedMessage = (emailSent, email) => (
+  emailSent
+    ? `Password changed. A confirmation email was sent to ${email}.`
+    : `Password changed. A confirmation email to ${email} could not be sent.`
+);
+
+const notifyPasswordChanged = async (user) => {
+  const recipientModel = user.role === 'admin'
+    ? 'Admin'
+    : user.role === 'boutique_owner'
+      ? 'BoutiqueOwner'
+      : 'Customer';
+
+  try {
+    await Notification.create({
+      recipient: user._id,
+      recipientModel,
+      type: 'system',
+      title: 'Password changed',
+      message: 'Your account password was changed. If you did not do this, reset it immediately.',
+      link: '/profile',
+    });
+  } catch (err) {
+    console.error('Password changed notification error:', err);
+  }
+};
+
+const sendTokenResponse = (user, statusCode, res, extra = {}) => {
   const { accessToken, refreshToken } = generateTokens(user._id, user.role);
 
   const cookieOptions = {
@@ -62,6 +119,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     .cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 })
     .json({
       success: true,
+      ...extra,
       user: {
         _id: user._id,
         name: user.name,
@@ -549,7 +607,12 @@ const updateProfile = async (req, res) => {
 // @access  Private
 const updatePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
+    const parsed = updatePasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const errors = parsed.error.issues.map(i => i.message).join(', ');
+      return res.status(400).json({ success: false, message: errors });
+    }
+    const { currentPassword, newPassword } = parsed.data;
 
     const Model = getUserModel(req.user.role);
     const user = await Model.findById(req.user._id).select('+password');
@@ -571,7 +634,14 @@ const updatePassword = async (req, res) => {
     user.password = newPassword;
     await user.save();
 
-    res.json({ success: true, message: 'Password updated successfully' });
+    const emailSent = await sendPasswordChangedEmail(user);
+    await notifyPasswordChanged(user);
+
+    res.json({
+      success: true,
+      emailSent,
+      message: passwordChangedMessage(emailSent, user.email),
+    });
   } catch (error) {
     console.error('Update password error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -676,7 +746,12 @@ const verifyOTP = async (req, res) => {
 // @access  Public
 const resetPassword = async (req, res) => {
   try {
-    const { email, role = 'customer', otp, password } = req.body;
+    const parsed = resetPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const errors = parsed.error.issues.map(i => i.message).join(', ');
+      return res.status(400).json({ success: false, message: errors });
+    }
+    const { email, role, otp, password } = parsed.data;
 
     // Get hashed token from OTP
     const resetPasswordToken = crypto
@@ -702,7 +777,12 @@ const resetPassword = async (req, res) => {
     matchingUser.lockUntil = undefined;
     await matchingUser.save();
 
-    sendTokenResponse(matchingUser, 200, res);
+    const emailSent = await sendPasswordChangedEmail(matchingUser);
+    await notifyPasswordChanged(matchingUser);
+    sendTokenResponse(matchingUser, 200, res, {
+      emailSent,
+      message: passwordChangedMessage(emailSent, matchingUser.email),
+    });
   } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({ success: false, message: 'Server error' });

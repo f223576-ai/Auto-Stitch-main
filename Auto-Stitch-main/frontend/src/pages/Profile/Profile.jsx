@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Save, Shield, Bell, Lock, Eye, EyeOff, ShieldCheck, QrCode, KeyRound, CheckCircle2, X } from 'lucide-react';
 import API_URL from '../../config/api';
+import { passwordError } from '../../utils/passwordPolicy';
+import PasswordRules from '../../components/PasswordRules';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import './Profile.css';
@@ -11,6 +13,7 @@ export default function Profile({ user, onLogout, onUpdate }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [passwordChanged, setPasswordChanged] = useState(null);
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -121,9 +124,10 @@ export default function Profile({ user, onLogout, onUpdate }) {
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
     setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
-    if (name === 'newPassword' || name === 'confirmPassword') {
+    if (name === 'newPassword' || name === 'confirmPassword' || name === 'currentPassword') {
       setError('');
       setSuccess('');
+      setPasswordChanged(null);
     }
   };
 
@@ -140,6 +144,11 @@ export default function Profile({ user, onLogout, onUpdate }) {
         setError('Please fill in all password fields');
         return;
       }
+      const passwordIssue = passwordError(form.newPassword);
+      if (passwordIssue) {
+        setError(passwordIssue);
+        return;
+      }
     }
 
     setLoading(true);
@@ -150,7 +159,18 @@ export default function Profile({ user, onLogout, onUpdate }) {
           { withCredentials: true }
         );
         if (!res.data.success) throw new Error(res.data.message || 'Password update failed');
-        setSuccess('Password updated successfully!');
+        const notice = {
+          emailSent: Boolean(res.data.emailSent),
+          email: user?.email || '',
+        };
+        setPasswordChanged(notice);
+        setSuccess('Password changed');
+        toast.success(
+          notice.emailSent
+            ? `Password changed. A confirmation email was sent to ${notice.email}.`
+            : 'Password changed',
+          { duration: 6000 }
+        );
         setForm(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
       } else {
         const payload = {
@@ -278,7 +298,7 @@ export default function Profile({ user, onLogout, onUpdate }) {
             <button
               key={tab.id}
               className={`profile-nav-item ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => { setActiveTab(tab.id); setError(''); setSuccess(''); }}
+              onClick={() => { setActiveTab(tab.id); setError(''); setSuccess(''); setPasswordChanged(null); }}
             >
               {tab.label}
             </button>
@@ -288,8 +308,18 @@ export default function Profile({ user, onLogout, onUpdate }) {
 
         {/* Content */}
         <div className="profile-content">
-          {error && <div className="profile-alert profile-error">{error}</div>}
-          {success && <div className="profile-alert profile-success">{success}</div>}
+          {error && (
+            <div className="profile-alert profile-error" role="alert">
+              <X size={18} />
+              <span>{error}</span>
+            </div>
+          )}
+          {success && (
+            <div className="profile-alert profile-success" role="status">
+              <CheckCircle2 size={18} />
+              <span>{success}</span>
+            </div>
+          )}
 
           {activeTab === 'personal' && (
             <div className="profile-section">
@@ -493,6 +523,7 @@ export default function Profile({ user, onLogout, onUpdate }) {
                         {showNewPass ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
+                    <PasswordRules password={form.newPassword} />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Confirm New Password</label>
@@ -516,6 +547,19 @@ export default function Profile({ user, onLogout, onUpdate }) {
                   <p id="password-mismatch-message" className="password-mismatch-message" role="alert">
                     The new passwords do not match.
                   </p>
+                )}
+                {passwordChanged && (
+                  <div className="password-changed-notice" role="status">
+                    <CheckCircle2 size={20} />
+                    <div>
+                      <strong>Password changed</strong>
+                      <p>
+                        {passwordChanged.emailSent
+                          ? `A confirmation email was sent to ${passwordChanged.email}.`
+                          : `Your new password is saved. A confirmation email to ${passwordChanged.email} could not be sent.`}
+                      </p>
+                    </div>
+                  </div>
                 )}
                 <button className="profile-save-btn" onClick={handleSave} disabled={loading}>
                   {loading ? 'Updating...' : 'Update Password'}

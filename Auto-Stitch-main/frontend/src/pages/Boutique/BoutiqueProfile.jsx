@@ -8,6 +8,7 @@ import {
 import { FaInstagram, FaFacebookF } from 'react-icons/fa6';
 import { useWishlist } from '../../context/WishlistContext';
 import API_URL from '../../config/api';
+import VisitingCard from '../../components/VisitingCard';
 import './BoutiqueProfile.css';
 
 // Import Elan Editorial Photos
@@ -172,6 +173,22 @@ export default function BoutiqueProfile() {
             <h1 className="brand-logo-serif">{boutique?.name || 'Loading...'}</h1>
           </div>
         </div>
+
+        {boutique?.visitingCard?.visible && boutique.visitingCard.image && (
+          <section className="public-visiting-card">
+            <VisitingCard
+              name={boutique.name}
+              image={boutique.visitingCard.image}
+              addressLines={[
+                boutique.visitingCard.address?.street,
+                [boutique.visitingCard.address?.city, boutique.visitingCard.address?.province].filter(Boolean).join(', '),
+                boutique.visitingCard.address?.postalCode
+              ].filter(Boolean)}
+              phone={boutique.visitingCard.contact?.phone}
+              email={boutique.visitingCard.contact?.email}
+            />
+          </section>
+        )}
 
         <div className="brand-subheader" style={{ justifyContent: 'flex-start', marginTop: '20px' }}>
           <h2 className="serif-subtitle">New Arrivals</h2>
