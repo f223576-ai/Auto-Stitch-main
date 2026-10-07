@@ -7,6 +7,8 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { loginWithFacebook as triggerFBLogin } from '../../utils/fbSDK';
 import Logo from '../../components/Logo/Logo';
 import API_URL from '../../config/api';
+import { passwordError } from '../../utils/passwordPolicy';
+import PasswordRules from '../../components/PasswordRules';
 import axios from 'axios';
 import './Auth.css';
 
@@ -34,11 +36,8 @@ export default function Register({ onLogin }) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|co|info|io|pk|uk|us|ca|au)$/i;
     if (!emailRegex.test(form.email)) return 'Please enter a valid email domain (e.g., .com, .net)';
 
-    // Password Policy Check
-    if (form.password.length < 8) return 'Password must be at least 8 characters';
-    if (!/[A-Z]/.test(form.password)) return 'Password must contain at least one uppercase letter';
-    if (!/[a-z]/.test(form.password)) return 'Password must contain at least one lowercase letter';
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(form.password)) return 'Password must contain at least one special character';
+    const passwordIssue = passwordError(form.password);
+    if (passwordIssue) return passwordIssue;
 
     if (form.password !== form.confirmPassword) return 'Passwords do not match';
     if (!consent) return 'Please accept the terms and privacy policy';
@@ -209,6 +208,7 @@ export default function Register({ onLogin }) {
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              <PasswordRules password={form.password} />
             </div>
 
             <div className="form-group-v2">

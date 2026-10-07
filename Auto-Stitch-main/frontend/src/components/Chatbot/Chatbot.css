@@ -164,6 +164,7 @@
 
 .chat-bubble.assistant {
   align-self: flex-start;
+  max-width: 100%;
 }
 
 .chat-bubble.user {
@@ -183,6 +184,131 @@
   border-bottom-left-radius: 4px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
+}
+
+.assistant .bubble-content p {
+  margin: 0 0 0.7rem;
+}
+
+.assistant .bubble-content p:last-child,
+.assistant .bubble-content .chat-list:last-child {
+  margin-bottom: 0;
+}
+
+.assistant .bubble-content strong {
+  font-weight: 650;
+}
+
+.assistant .bubble-content .chat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.assistant .bubble-content .chat-list li {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  background: #f6f1ea;
+  border-left: 2px solid #161616;
+  line-height: 1.55;
+}
+
+.assistant .bubble-content .chat-price {
+  display: inline-block;
+  margin: 0 0.15rem;
+  padding: 0.05rem 0.4rem;
+  background: #161616;
+  color: #fff;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.assistant .bubble-content .chat-heading {
+  margin: 0.15rem 0 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8a7358;
+}
+
+.assistant .bubble-content .chat-list.ordered {
+  counter-reset: chat-step;
+}
+
+.assistant .bubble-content .chat-list.ordered li {
+  position: relative;
+  padding-left: 2.15rem;
+}
+
+.assistant .bubble-content .chat-list.ordered li::before {
+  counter-increment: chat-step;
+  content: counter(chat-step);
+  position: absolute;
+  left: 0.7rem;
+  top: 0.72rem;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.assistant .bubble-content .chat-quote {
+  margin: 0 0 0.7rem;
+  padding: 0.15rem 0 0.15rem 0.75rem;
+  border-left: 2px solid #c8b8a4;
+  color: #4d463f;
+  font-family: "Tenor Sans", serif;
+}
+
+.assistant .bubble-content a {
+  color: inherit;
+  text-underline-offset: 2px;
+}
+
+.assistant .bubble-content code {
+  font-size: 0.82em;
+  background: #f3f1ee;
+  padding: 0.05rem 0.3rem;
+}
+
+.assistant .bubble-content .chat-code {
+  margin: 0 0 0.7rem;
+  padding: 0.7rem 0.8rem;
+  background: #f6f1ea;
+  white-space: pre-wrap;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.assistant .bubble-content .chat-table-wrap {
+  overflow-x: auto;
+  margin: 0 0 0.7rem;
+}
+
+.assistant .bubble-content .chat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.assistant .bubble-content .chat-table th,
+.assistant .bubble-content .chat-table td {
+  text-align: left;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid #ece4da;
+  vertical-align: top;
+}
+
+.assistant .bubble-content .chat-table th {
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a7358;
+  font-weight: 650;
 }
 
 .user .bubble-content {

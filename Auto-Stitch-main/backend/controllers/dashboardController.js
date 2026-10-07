@@ -58,7 +58,8 @@ const getBoutiqueStats = async (req, res) => {
         kyc: boutique.kyc,
         address: boutique.address,
         contact: boutique.contact,
-        name: boutique.name
+        name: boutique.name,
+        visitingCard: boutique.visitingCard,
       },
       stats: {
         totalProducts,

@@ -8,6 +8,7 @@ import {
   Sparkles, MessageSquare
 } from 'lucide-react';
 import API_URL from '../../config/api';
+import VisitingCard from '../../components/VisitingCard';
 import './Dashboard.css';
 
 const ShieldCheck = ({ size, style }) => (
@@ -20,6 +21,20 @@ const ShieldCheck = ({ size, style }) => (
 export function BoutiqueDashboard({ user }) {
   const [stats, setStats] = useState({ totalRevenue: 0, totalOrders: 0, activeProducts: 0, reputation: 4.8 });
   const [boutiqueData, setBoutiqueData] = useState(null);
+  const [cardForm, setCardForm] = useState({
+    visible: false,
+    image: '',
+    street: '',
+    city: '',
+    province: '',
+    postalCode: '',
+    phone: '',
+    email: ''
+  });
+  const [cardMessage, setCardMessage] = useState('');
+  const [cardError, setCardError] = useState('');
+  const [savingCard, setSavingCard] = useState(false);
+  const [uploadingCard, setUploadingCard] = useState(false);
   const [recentOrders, setRecentOrders] = useState([]);
   const [activeBids, setActiveBids] = useState([]);
   const [products, setProducts] = useState([]);
@@ -47,7 +62,21 @@ export function BoutiqueDashboard({ user }) {
           activeProducts: statsRes.data.stats.totalProducts || 0,
           reputation: 4.8
         });
-        setBoutiqueData(statsRes.data.boutique);
+        const boutique = statsRes.data.boutique;
+        setBoutiqueData(boutique);
+        const card = boutique?.visitingCard;
+        if (card) {
+          setCardForm({
+            visible: card.visible === true,
+            image: card.image || '',
+            street: card.address?.street || '',
+            city: card.address?.city || '',
+            province: card.address?.province || '',
+            postalCode: card.address?.postalCode || '',
+            phone: card.contact?.phone || '',
+            email: card.contact?.email || ''
+          });
+        }
       }
 
       if (ordersRes.data.success) setRecentOrders(ordersRes.data.orders?.slice(0, 3) || []);
@@ -78,6 +107,91 @@ export function BoutiqueDashboard({ user }) {
   };
 
   const statusDisplay = getStatusDisplay();
+
+  const updateCardField = (field, value) => {
+    setCardForm((prev) => ({ ...prev, [field]: value }));
+    setCardMessage('');
+    setCardError('');
+  };
+
+  const handleCardPhoto = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const uploadData = new FormData();
+    uploadData.append('image', file);
+    setUploadingCard(true);
+    setCardError('');
+    try {
+      const res = await axios.post(`${API_URL}/api/upload`, uploadData, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success) {
+        updateCardField('image', res.data.url);
+      }
+    } catch (err) {
+      setCardError(err.response?.data?.message || 'Photo upload failed');
+    } finally {
+      setUploadingCard(false);
+    }
+  };
+
+  const persistVisitingCard = async (form, message) => {
+    setCardMessage('');
+    setCardError('');
+    setSavingCard(true);
+    try {
+      const res = await axios.put(`${API_URL}/api/boutiques/visiting-card`, {
+        visible: form.visible === true,
+        image: form.image,
+        address: {
+          street: form.street,
+          city: form.city,
+          province: form.province,
+          postalCode: form.postalCode
+        },
+        contact: {
+          phone: form.phone,
+          email: form.email
+        }
+      }, { withCredentials: true });
+      setCardMessage(message || res.data.message || 'Visiting card saved');
+      setCardForm((prev) => ({ ...prev, visible: res.data.visitingCard?.visible === true }));
+      setBoutiqueData((prev) => ({ ...prev, visitingCard: res.data.visitingCard }));
+      return true;
+    } catch (err) {
+      setCardError(err.response?.data?.message || 'Could not save visiting card');
+      return false;
+    } finally {
+      setSavingCard(false);
+    }
+  };
+
+  const saveVisitingCard = (e) => {
+    e.preventDefault();
+    persistVisitingCard(cardForm, 'Visiting card saved');
+  };
+
+  const handleCardVisibility = async (visible) => {
+    const previous = cardForm.visible;
+    const nextForm = { ...cardForm, visible };
+    setCardForm(nextForm);
+    const saved = await persistVisitingCard(
+      nextForm,
+      visible ? 'Visiting card is now visible' : 'Visiting card is now hidden'
+    );
+    if (!saved) {
+      setCardForm((prev) => ({ ...prev, visible: previous }));
+    }
+  };
+
+  const cardAddressLines = [
+    cardForm.street,
+    [cardForm.city, cardForm.province].filter(Boolean).join(', '),
+    cardForm.postalCode
+  ].filter(Boolean);
 
   if (loading) {
     return (
@@ -229,6 +343,87 @@ export function BoutiqueDashboard({ user }) {
               </div>
             </Link>
           </div>
+
+          <section className="dash-section" style={{ marginBottom: '4rem' }}>
+            <div className="visiting-card-heading">
+              <div>
+                <h2 className="dash-section-title" style={{ fontFamily: '"Tenor Sans", serif', fontSize: '1.8rem' }}>Visiting Card</h2>
+                <p className="text-muted" style={{ fontSize: '0.8rem' }}>Add a photo, address, and contact details for your public boutique page</p>
+              </div>
+              <label className="visiting-card-toggle">
+                <span>
+                  <strong>{cardForm.visible ? 'Visible' : 'Hidden'}</strong>
+                  Show on your boutique page
+                </span>
+                <span className="switch">
+                  <input
+                    type="checkbox"
+                    checked={cardForm.visible}
+                    onChange={(e) => handleCardVisibility(e.target.checked)}
+                    disabled={savingCard || uploadingCard}
+                    aria-label="Show visiting card"
+                  />
+                  <span className="slider" />
+                </span>
+              </label>
+            </div>
+            <div className="visiting-card-editor">
+              <form className="visiting-card-form" onSubmit={saveVisitingCard}>
+                <label className="span-2">
+                  Photo
+                  <div className="visiting-card-photo-field">
+                    {cardForm.image ? (
+                      <img src={cardForm.image} alt="" />
+                    ) : (
+                      <span className="visiting-card-photo-placeholder">Photo</span>
+                    )}
+                    <span className="visiting-card-upload">
+                      {uploadingCard ? 'Uploading…' : 'Choose photo'}
+                      <input type="file" accept="image/*" onChange={handleCardPhoto} disabled={uploadingCard} />
+                    </span>
+                  </div>
+                </label>
+                <label className="span-2">
+                  Street
+                  <input type="text" value={cardForm.street} onChange={(e) => updateCardField('street', e.target.value)} required />
+                </label>
+                <label>
+                  City
+                  <input type="text" value={cardForm.city} onChange={(e) => updateCardField('city', e.target.value)} required />
+                </label>
+                <label>
+                  Province
+                  <input type="text" value={cardForm.province} onChange={(e) => updateCardField('province', e.target.value)} />
+                </label>
+                <label>
+                  Postal code
+                  <input type="text" value={cardForm.postalCode} onChange={(e) => updateCardField('postalCode', e.target.value)} />
+                </label>
+                <label>
+                  Phone
+                  <input type="tel" value={cardForm.phone} onChange={(e) => updateCardField('phone', e.target.value)} required />
+                </label>
+                <label className="span-2">
+                  Email
+                  <input type="email" value={cardForm.email} onChange={(e) => updateCardField('email', e.target.value)} />
+                </label>
+                <div className="visiting-card-actions">
+                  <button type="submit" className="btn-black" disabled={savingCard || uploadingCard} style={{ padding: '12px 24px' }}>
+                    {savingCard ? 'Saving…' : 'Save visiting card'}
+                  </button>
+                  {cardMessage && <p className="visiting-card-note success">{cardMessage}</p>}
+                  {cardError && <p className="visiting-card-note error">{cardError}</p>}
+                </div>
+              </form>
+              <VisitingCard
+                name={boutiqueData?.name}
+                image={cardForm.image}
+                addressLines={cardAddressLines}
+                phone={cardForm.phone}
+                email={cardForm.email}
+              />
+            </div>
+          </section>
 
           <div className="dash-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem' }}>
             {/* Recent Orders/Sales */}
